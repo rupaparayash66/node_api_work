@@ -1,6 +1,8 @@
-const e = require('express')
+const express = require('express')
 var USER = require('../models/user')
-var bcrypt = require('bcrypt')
+var bcrypt = require('bcrypt')      
+var jwt = require('jsonwebtoken');
+
 
 exports.usercreate = async (req, res) => {
     try {
@@ -76,7 +78,6 @@ exports.deletebyId = async (req, res) => {
             data: data
         })
 
-
     } catch (error) {
         res.status(401).json({
             status: 'Failed',
@@ -85,30 +86,31 @@ exports.deletebyId = async (req, res) => {
     }
 }
 
-exports.updateuser = async (req, res) => {
-    try {
+    exports.updateuser = async (req, res) => {
+        try {
 
-        let data = await USER.findByIdAndUpdate(req.params.id, req.body)
-        
-        // password = await bcrypt.hash(password, 10)
+            let { password } = req.body
 
-        // let pass = await bcrypt.compare(password, cheakemail.password)
+            req.body.password = await bcrypt.hash(password, 10)
+
+            let data = await USER.findByIdAndUpdate(req.params.id, req.body)
 
 
-        res.status(201).json({
-            status: 'Sucessfully',
-            // data: data
-        });
 
-    } catch (error) {
+            res.status(201).json({
+                status: 'Sucessfully',
+                // data: data
+            });
 
-        res.status(401).json({
-            status: 'Failed',
-            message: error.message
-        })
+        } catch (error) {
 
+            res.status(401).json({
+                status: 'Failed',
+                message: error.message
+            })
+
+        }
     }
-}
 
 exports.userlogin = async (req, res) => {
     try {
@@ -135,9 +137,16 @@ exports.userlogin = async (req, res) => {
 
         if (!pass) throw new Error("pass not valid")
 
+            let token = await jwt.sign({email : cheakemail.email} , 'YASH1425')
+
+            console.log(token);
+            
+
         res.status(201).json({
             status: 'Sucessfully',
             // data: data
+            token :token
+
         });
 
     } catch (error) {

@@ -1,6 +1,6 @@
 var ADMIN = require('../models/admin')
 var bcrypt = require('bcrypt')
-
+var jwt = require('jsonwebtoken');
 
 exports.usercreate = async (req, res) => {
     try {
@@ -87,6 +87,10 @@ exports.deletebyId = async (req, res) => {
 exports.updateuser = async (req, res) => {
     try {
 
+        let { password } = req.body
+
+        req.body.password = await bcrypt.hash(password, 10)
+
         let data = await ADMIN.findByIdAndUpdate(req.params.id, req.body)
 
         res.status(201).json({
@@ -100,7 +104,6 @@ exports.updateuser = async (req, res) => {
             status: 'Failed',
             message: error.message
         })
-
     }
 }
 
